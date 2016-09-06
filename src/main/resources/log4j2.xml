@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="OFF">
+	<!-- 定义全局变量以便使用 -->
+	<Properties>
+        <Property name="LOG_HOME">/opt/logs/springmvc/demo1</Property>
+        <!-- 日志备份目录 -->
+        <Property name="DEBUG_NAME">debug</Property>
+        <Property name="INFO_NAME">info</Property>
+        <Property name="ERROR_NAME">error</Property>
+	</Properties>
+	
+	<!-- 日志输出地 -->
+    <Appenders>
+        <!-- 定义控制台输出 -->
+        <Console name="Console" target="SYSTEM_OUT" follow="true">
+            <PatternLayout pattern="%d{DEFAULT} %-5level %class{36} LINE:%L - %msg%xEx%n" />
+        </Console>
+        <!-- 每天gzip一次，单文件最大20M，每天可以有7个 -->
+        <RollingFile name="DailyFile4Debug" fileName="${LOG_HOME}/${DEBUG_NAME}.log"
+				filePattern="${LOG_HOME}/$${date:yyyy-MM}/${DEBUG_NAME}-%d{yyyy-MM-dd}-%i.log.gz">
+			<PatternLayout>
+				<Pattern>%d{DEFAULT} %-5level %class{36} LINE:%L - %msg%xEx%n</Pattern>
+			</PatternLayout>
+			<Policies>
+				<TimeBasedTriggeringPolicy />
+				<SizeBasedTriggeringPolicy size="20MB"/>
+			</Policies>
+      		<filters>
+	            <ThresholdFilter level="INFO" onMatch="DENY" onMismatch="NEUTRAL"/>
+	            <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
+			</filters>
+		</RollingFile>
+		
+        <RollingFile name="DailyFile4Info" fileName="${LOG_HOME}/${INFO_NAME}.log"
+				filePattern="${LOG_HOME}/$${date:yyyy-MM}/${INFO_NAME}-%d{yyyy-MM-dd}-%i.log.gz">
+			<PatternLayout>
+				<Pattern>%d{DEFAULT} %-5level %class{36} LINE:%L - %msg%xEx%n</Pattern>
+			</PatternLayout>
+			<Policies>
+				<TimeBasedTriggeringPolicy />
+				<SizeBasedTriggeringPolicy size="20MB"/>
+			</Policies>
+			<filters>
+	            <ThresholdFilter level="WARN" onMatch="DENY" onMismatch="NEUTRAL"/>
+	            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+			</filters>
+		</RollingFile>
+		
+        <RollingFile name="DailyFile4Error" fileName="${LOG_HOME}/${ERROR_NAME}.log"
+				filePattern="${LOG_HOME}/$${date:yyyy-MM}/${ERROR_NAME}-%d{yyyy-MM-dd}-%i.log.gz">
+			<PatternLayout>
+				<Pattern>%d{DEFAULT} %-5level %class{36} LINE:%L - %msg%xEx%n</Pattern>
+			</PatternLayout>
+			<Policies>
+				<TimeBasedTriggeringPolicy />
+				<SizeBasedTriggeringPolicy size="20MB"/>
+			</Policies>
+			<filters>
+            	<ThresholdFilter level="FATAL" onMatch="DENY" onMismatch="NEUTRAL"/>
+            	<ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
+            </filters>
+		</RollingFile>
+    </Appenders>
+    
+	<!-- 具体的日志对象及LEVEL控制 -->
+	<Loggers>
+	
+		<!-- 控制台打印SQL -->
+		<Logger name="org.myself.springmvc.dao" level="debug" additivity="false">
+			<Appender-ref ref="Console" />
+		</Logger>
+		
+		<!-- 系统日志文件 -->
+		<Logger name="org.myself.springmvc." level="trace" additivity="false">
+			<Appender-ref ref="DailyFile4Error" />
+			<Appender-ref ref="DailyFile4Info" />
+			<Appender-ref ref="DailyFile4Debug" />
+		</Logger>
+		
+		<!-- 框架日志文件 -->		 
+		<Logger name="org.springframework" level="error" additivity="false">
+			<Appender-ref ref="DailyFile4Error" />
+			<!-- <Appender-ref ref="Console" /> -->
+		</Logger>
+		
+		<Root level="ERROR">
+			<Appender-ref ref="DailyFile4Error" />
+			<!-- <Appender-ref ref="Console" /> -->
+		</Root>
+	</Loggers>
+</Configuration>
